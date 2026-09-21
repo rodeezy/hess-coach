@@ -1,0 +1,33 @@
+@import 'tailwindcss';
+
+@plugin '@tailwindcss/typography';
+@plugin '@tailwindcss/forms';
+
+/* One accent color, driven by trainer branding (spec UX-1). */
+@theme {
+  --color-accent: oklch(0.55 0.17 250);
+}
+
+/* Explicit surface colors in both schemes. Without these the page keeps a white
+   background while `dark:` text variants activate, which fails AA (spec UX-9). */
+:root {
+  --surface: oklch(1 0 0);
+  --on-surface: oklch(0.21 0.01 260);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: oklch(0.17 0.01 260);
+    --on-surface: oklch(0.97 0 0);
+  }
+}
+
+html {
+  background-color: var(--surface);
+  color-scheme: light dark;
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--on-surface);
+}

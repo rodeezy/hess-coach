@@ -1,0 +1,28 @@
+<main class="mx-auto max-w-sm px-4 py-16">
+  <h1 class="text-xl font-semibold tracking-tight">Sign in</h1>
+
+  <% if alert = flash[:alert] %>
+    <p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700"><%= alert %></p>
+  <% end %>
+  <% if notice = flash[:notice] %>
+    <p class="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-700"><%= notice %></p>
+  <% end %>
+
+  <%= form_with url: login_path, class: "mt-6 space-y-4" do |f| %>
+    <div>
+      <%= f.label :email_address, "Email", class: "block text-sm font-medium" %>
+      <%= f.email_field :email_address, required: true, autofocus: true, autocomplete: "username",
+            class: "mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2" %>
+    </div>
+    <div>
+      <%= f.label :password, "Password", class: "block text-sm font-medium" %>
+      <%= f.password_field :password, required: true, autocomplete: "current-password",
+            class: "mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2" %>
+    </div>
+    <%= f.submit "Sign in", class: "w-full rounded-lg bg-neutral-900 px-3 py-2 text-white" %>
+  <% end %>
+
+  <p class="mt-4 text-sm text-neutral-500">
+    <%= link_to "Forgot password?", new_password_path %>
+  </p>
+</main>
