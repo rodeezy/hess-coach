@@ -69,6 +69,22 @@ Open signup is off by design (spec section 8) — the account comes from seeds.
 bundle exec rspec
 ```
 
+### Trying it on an iPhone
+
+It is a web app, not a native build (spec section 2), so there is nothing to
+install from an App Store. Put the phone on the same wifi as the Mac, then open
+`http://<your-mac-lan-ip>:3000` in Safari. `ipconfig getifaddr en0` prints the
+address. Share > Add to Home Screen installs it: the manifest gives it an icon
+and launches it standalone, without Safari's chrome.
+
+Rails binds `0.0.0.0` and proxies `/vite-dev/` to the Vite server, so the phone
+only ever talks to port 3000.
+
+One limit worth knowing: service workers need HTTPS or localhost, so **offline
+will not work over plain LAN HTTP**. That is fine for phase 1, which has no
+offline logger yet. Testing the offline queue in phase 4 will need a tunnel
+(`cloudflared`, `ngrok`) or local certs (`mkcert`) to get real HTTPS.
+
 ## Where things are
 
 ```
