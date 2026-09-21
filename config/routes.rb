@@ -6,6 +6,19 @@ Rails.application.routes.draw do
   delete "logout", to: "auth_sessions#destroy", as: :logout
   resources :passwords, param: :token
 
+  resources :clients do
+    member do
+      post "archive"
+      post "unarchive"
+      post "change-phase", action: :change_phase, as: :change_phase
+    end
+    resources :notes, only: %i[index create update destroy]
+    resources :metric_entries, only: %i[create update destroy], path: "metric-entries"
+    resource  :assessment, only: %i[show create]
+    get  "metrics", to: "metrics#index",          as: :metrics
+    put  "metrics/tracked", to: "metrics#update_tracked", as: :tracked_metrics
+  end
+
   resources :exercises, only: %i[index]
   resource  :import_review, only: %i[show], path: "library/import-review"
 

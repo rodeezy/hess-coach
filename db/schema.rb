@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_20_240007) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_21_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -249,14 +249,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_20_240007) do
     t.boolean "is_computed", default: false, null: false
     t.boolean "is_two_sided", default: false, null: false
     t.string "key", null: false
+    t.string "measure"
     t.string "name", null: false
+    t.integer "sort_order", default: 0, null: false
     t.uuid "trainer_id"
     t.string "unit"
     t.datetime "updated_at", null: false
+    t.index ["group", "sort_order"], name: "index_metric_types_on_group_and_sort_order"
     t.index ["trainer_id", "key"], name: "index_metric_types_on_trainer_id_and_key", unique: true
     t.index ["trainer_id"], name: "index_metric_types_on_trainer_id"
     t.check_constraint "\"group\"::text = ANY (ARRAY['biometric'::character varying::text, 'performance'::character varying::text, 'movement'::character varying::text])", name: "metric_types_group_check"
     t.check_constraint "direction::text = ANY (ARRAY['up'::character varying::text, 'down'::character varying::text, 'neutral'::character varying::text])", name: "metric_types_direction_check"
+    t.check_constraint "measure IS NULL OR (measure::text = ANY (ARRAY['mass'::character varying::text, 'length'::character varying::text]))", name: "metric_types_measure_check"
   end
 
   create_table "muscle_groups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

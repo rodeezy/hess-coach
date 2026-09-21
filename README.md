@@ -90,10 +90,12 @@ offline logger yet. Testing the offline queue in phase 4 will need a tunnel
 ```
 app/models/                        27 domain tables + Trainer/AuthSession
 app/controllers/                   InertiaController (React screens) | ApplicationController (plain ERB)
-app/services/                      ExerciseLibraryImport
+app/services/                      ExerciseLibraryImport, MetricPresenter
+app/calculations/                  Ffmi, Units - pure functions, unit tested
 app/frontend/pages/                One .tsx per Inertia screen
 lib/seeds/lookups.rb               Patterns, muscle groups, phases, block presets, presentations (spec 7)
 lib/seeds/exercise_types.rb        Type defaults: pattern, block, prescription, muscles (spec 7)
+lib/seeds/metric_types.rb          33 metric types in Julian's three assessment groups (spec 7)
 db/seeds/private/                  Julian's exercise_library.csv. Gitignored: client data.
 ```
 
@@ -125,6 +127,19 @@ Phases from spec section 12. Each ends with something usable.
 - [ ] **5** Analytics, benchmarks, goals, readiness trends
 - [ ] **6** Report cards, PDF, email, export
 - [ ] **7** Should-haves, only after two weeks of real use
+
+## Units
+
+Loads, masses and lengths are stored canonically (kilograms, centimetres) and
+converted at the edges, the rule the spec sets for loads in section 2. A metric
+type carries a `measure` of `mass`, `length` or null; null means the metric is
+unit-agnostic (degrees, bpm, percent, reps, a 1-3 score) and is stored as typed.
+So switching the display unit re-renders every past entry correctly instead of
+reinterpreting stored numbers.
+
+FFMI follows from this: it needs kilograms and metres regardless of what Julian
+types, and is computed from a body fat entry plus the nearest body weight entry
+within 7 days (spec 6.8). It is never entered by hand.
 
 ## Open questions for Julian
 

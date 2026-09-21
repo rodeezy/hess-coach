@@ -25,7 +25,8 @@ export default function Shell({ children }: { children: ReactNode }) {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex min-h-11 flex-1 items-center justify-center px-4 py-3 text-sm sm:justify-start
+            className={`flex min-h-11 flex-1 items-center justify-center px-4 py-3 text-sm
+              sm:flex-none sm:justify-start
               ${active(item.href)
                 ? "font-medium text-neutral-900 sm:bg-neutral-100 dark:text-neutral-50 sm:dark:bg-neutral-900"
                 : "text-neutral-500 dark:text-neutral-400"}`}

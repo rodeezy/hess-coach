@@ -31,3 +31,28 @@ body {
   background-color: var(--surface);
   color: var(--on-surface);
 }
+
+/* Chart roles. Categorical slots 1 and 2 from the validated palette, stepped
+   per mode rather than flipped. */
+.viz {
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --viz-grid: oklch(0.90 0.005 260);
+  --viz-muted: oklch(0.55 0.01 260);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .viz {
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --viz-grid: oklch(0.30 0.008 260);
+    --viz-muted: oklch(0.65 0.01 260);
+  }
+}
+
+:root[data-theme="dark"] .viz {
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --viz-grid: oklch(0.30 0.008 260);
+  --viz-muted: oklch(0.65 0.01 260);
+}

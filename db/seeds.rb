@@ -17,6 +17,7 @@ trainer.save!
 
 Seeds::Lookups.call(trainer)
 Seeds::ExerciseTypes.call(trainer)
+Seeds::MetricTypes.call
 
 csv_path = Rails.root.join("db/seeds/private/exercise_library.csv")
 if csv_path.exist?
@@ -35,3 +36,4 @@ puts "  muscle groups   #{MuscleGroup.count}"
 puts "  phases          #{trainer.phases.count}"
 puts "  block presets   #{trainer.block_presets.count}"
 puts "  presentations   #{trainer.presentations.count}"
+puts "  metric types    #{MetricType.count}"
