@@ -11,6 +11,9 @@
 ARG RUBY_VERSION=3.3.2
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
+# Node version for building Vite/JS assets
+ARG NODE_VERSION=22.11.0
+
 # Rails app lives here
 WORKDIR /rails
 
@@ -35,6 +38,11 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libpq-dev libvips libyaml-dev pkg-config && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
+# Install Node.js (needed to build Vite/React assets)
+RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz -C /tmp/ && \
+    /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local && \
+    rm -rf /tmp/node-build-master
+
 # Install application gems
 COPY vendor/* ./vendor/
 COPY Gemfile Gemfile.lock ./
@@ -47,12 +55,18 @@ RUN bundle install && \
 # Copy application code
 COPY . .
 
+# Install JS dependencies for the Vite build
+RUN npm ci
+
 # Precompile bootsnap code for faster boot times.
 # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+
+# JS deps and Vite build cache aren't needed at runtime
+RUN rm -rf node_modules
 
 
 
