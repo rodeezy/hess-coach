@@ -12,7 +12,7 @@ ARG RUBY_VERSION=3.3.2
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Node version for building Vite/JS assets
-ARG NODE_VERSION=22.11.0
+ARG NODE_VERSION=22.22.0
 
 # Rails app lives here
 WORKDIR /rails
@@ -55,8 +55,14 @@ RUN bundle install && \
 # Copy application code
 COPY . .
 
-# Install JS dependencies for the Vite build
-RUN npm ci
+# Install JS dependencies for the Vite build.
+# Using `npm install` instead of `npm ci` here on purpose: this Gemfile/package-lock.json
+# was generated on macOS, and npm's optional-dependency resolution (rolldown's native
+# binding, used by Vite/Rolldown) has a known bug where `npm ci` won't fetch the
+# linux-x64 binary if the lockfile was written on a different platform
+# (https://github.com/npm/cli/issues/4828). `npm install` re-resolves optional deps
+# for whatever platform it's actually running on, which fixes it.
+RUN npm install
 
 # Precompile bootsnap code for faster boot times.
 # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
