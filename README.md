@@ -107,6 +107,14 @@ the build (EX-1). Put `exercise_library.csv` in `db/seeds/private/` with columns
 Re-running is additive: it adds new rows and refreshes video and how-to by
 (name, type), and never deletes (EX-7).
 
+**On a deployed server**, upload it instead: the CSV is gitignored, so it is not in
+the repo the host builds from, and seeding there skips the library. Library >
+*Import from CSV* takes the sheet exported as CSV (Google Sheets: File > Download >
+Comma-separated values). It reads the sheet's own headers (`RECORDED?`, `How to:`)
+as well as the spec's spelling, tolerates the byte order mark Excel writes, and
+runs in one transaction, so a bad file leaves nothing half-imported. It rejects an
+.xlsx and a file without an Exercise and Exercise Type column, with a message.
+
 `/library/import-review` shows what the import changed and what looks
 inconsistent. From Julian's current sheet: 301 exercises, 34 rows where a type
 default was overridden per spec section 7, 16 where the sheet disagrees with

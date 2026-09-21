@@ -1,4 +1,4 @@
-import { Head, router } from "@inertiajs/react"
+import { Head, router, useForm } from "@inertiajs/react"
 import { useState } from "react"
 import Shell from "../components/Shell"
 
@@ -28,6 +28,7 @@ const BLOCK_LABEL: Record<string, string> = {
 export default function Library({ filters, types, muscleGroups, allTypes, totals }: Props) {
   const [q, setQ] = useState(filters.q ?? "")
   const [open, setOpen] = useState<string | null>(null)
+  const upload = useForm<{ file: File | null }>({ file: null })
 
   const apply = (next: Partial<Props["filters"]>) =>
     router.get("/exercises", { ...filters, ...next }, { preserveState: true, replace: true })
@@ -42,6 +43,48 @@ export default function Library({ filters, types, muscleGroups, allTypes, totals
             {totals.exercises} exercises · {totals.e1rm} e1RM eligible · {totals.needsVideo} need video
           </p>
         </header>
+
+        {/* Additive and never deletes: adds new exercises and refreshes video links and
+            how-to text (EX-7). Open by default when the library is nearly empty. */}
+        <details
+          open={totals.exercises < 50}
+          className="mt-6 rounded-xl border border-neutral-200 p-4 dark:border-neutral-800"
+        >
+          <summary className="cursor-pointer text-sm font-medium">Import from CSV</summary>
+          <form
+            className="mt-3 space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault()
+              upload.post("/exercises/import", { forceFormData: true })
+            }}
+          >
+            <p className="text-sm text-neutral-600 dark:text-neutral-300">
+              Upload the exercise sheet as a CSV. Running it again is safe: it adds new
+              exercises and refreshes video links and how-to text, and never deletes.
+            </p>
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              aria-label="Exercise CSV"
+              onChange={(e) => upload.setData("file", e.target.files?.[0] ?? null)}
+              className="block w-full text-sm file:mr-3 file:min-h-11 file:rounded-lg file:border-0
+                         file:bg-neutral-900 file:px-4 file:text-sm file:font-medium file:text-white
+                         dark:file:bg-neutral-100 dark:file:text-neutral-900"
+            />
+            {upload.errors.file && (
+              <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+                {upload.errors.file}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={!upload.data.file || upload.processing}
+              className="btn-primary disabled:opacity-50"
+            >
+              {upload.processing ? "Importing…" : "Import"}
+            </button>
+          </form>
+        </details>
 
         <form
           className="mt-6 flex flex-wrap gap-2"

@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     put  "metrics/tracked", to: "metrics#update_tracked", as: :tracked_metrics
   end
 
+  post "exercises/import", to: "import_reviews#create", as: :import_exercises
   resources :exercises, only: %i[index]
   resource  :import_review, only: %i[show], path: "library/import-review"
 

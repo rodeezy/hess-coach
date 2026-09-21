@@ -32,7 +32,9 @@ export default function ImportReview({ available, summary, groups, unmatched }: 
         <main className="mx-auto max-w-3xl px-4 py-8">
           <h1 className="text-2xl font-semibold tracking-tight">Import review</h1>
           <p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400">
-            No exercise library has been imported yet.
+            There is no import to review. The review appears right after you import a CSV
+            from the{" "}
+            <Link href="/exercises" className="underline">Library</Link>.
           </p>
         </main>
       </Shell>

@@ -12,6 +12,18 @@ class ExerciseLibraryImport
     def total = created + updated
   end
 
+  # Raised for a file that is not the exercise sheet, so an upload can say so
+  # instead of importing nothing and reporting success.
+  class InvalidFile < StandardError; end
+
+  REQUIRED_HEADERS = ["exercise", "exercise type"].freeze
+
+  # Julian's sheet heads its columns "RECORDED?" and "How to:", while the spec
+  # names them Recorded and How to. Compare headers loosely (case, trailing
+  # colon or question mark) so a CSV straight from Google Sheets works, and a
+  # hand-edited one does too. Without this, every how-to imports blank.
+  HEADER_NORMALIZER = ->(header) { header.to_s.strip.downcase.sub(/[?:]+\s*\z/, "").strip }
+
   # The sheet carries two misspellings (spec 7).
   TYPE_SPELLING_FIXES = {
     "mobiity" => "mobility",
@@ -79,16 +91,23 @@ class ExerciseLibraryImport
   end
 
   def call
+    validate_headers!
+    # One transaction, so a file that fails halfway leaves nothing half-imported.
+    ActiveRecord::Base.transaction { import_rows }
+  end
+
+  def import_rows
     created = updated = 0
     exceptions = []
     unmatched = Hash.new(0)
     position = Hash.new(0)
 
-    CSV.foreach(@csv_path, headers: true) do |row|
-      name = row["Exercise"].to_s.strip
+    CSV.foreach(@csv_path, headers: true, encoding: "bom|utf-8",
+                           header_converters: [HEADER_NORMALIZER]) do |row|
+      name = row["exercise"].to_s.strip
       next if name.blank?
 
-      raw_type = row["Exercise Type"].to_s.strip
+      raw_type = row["exercise type"].to_s.strip
       type = @types_by_name[normalize_type_name(raw_type)]
       if type.nil?
         unmatched[raw_type] += 1
@@ -101,9 +120,9 @@ class ExerciseLibraryImport
         next
       end
 
-      url  = row["URL"].to_s.strip.presence
-      how  = row["How to"].to_s.strip.presence
-      rec  = row["Recorded"].to_s.strip
+      url  = row["url"].to_s.strip.presence
+      how  = row["how to"].to_s.strip.presence
+      rec  = row["recorded"].to_s.strip
 
       exercise = @trainer.exercises.find_or_initialize_by(
         exercise_type_id: type.id, name: name
@@ -146,8 +165,19 @@ class ExerciseLibraryImport
     Result.new(created: created, updated: updated, exceptions: exceptions,
                unmatched_types: unmatched)
   end
+  private :import_rows
 
   private
+
+  def validate_headers!
+    header = CSV.open(@csv_path, encoding: "bom|utf-8", &:shift) || []
+    missing = REQUIRED_HEADERS - header.map(&HEADER_NORMALIZER)
+    return if missing.empty?
+
+    raise InvalidFile,
+      "That does not look like the exercise sheet. It needs an Exercise column and an " \
+      "Exercise Type column (missing: #{missing.join(', ')})."
+  end
 
   # "Morning Mobilzation - Knee" and "Mobiity" are typos in the sheet (spec 7).
   def normalize_type_name(value)
