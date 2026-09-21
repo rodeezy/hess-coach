@@ -13,12 +13,16 @@
 :root {
   --surface: oklch(1 0 0);
   --on-surface: oklch(0.21 0.01 260);
+  --muted: oklch(0.55 0.01 260);
+  --field-border: oklch(0.87 0.005 260);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --surface: oklch(0.17 0.01 260);
     --on-surface: oklch(0.97 0 0);
+    --muted: oklch(0.65 0.01 260);
+    --field-border: oklch(0.32 0.008 260);
   }
 }
 
@@ -30,6 +34,88 @@ html {
 body {
   background-color: var(--surface);
   color: var(--on-surface);
+}
+
+/* @tailwindcss/forms resets every control to a white background. On a dark
+   surface that left light text on white. Bind controls to the surface tokens
+   here rather than relying on each input remembering to say bg-transparent. */
+@layer base {
+  input,
+  select,
+  textarea {
+    background-color: transparent;
+    color: var(--on-surface);
+    border-color: var(--field-border);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted);
+    opacity: 1;
+  }
+
+  /* A native dropdown paints its own list, which does not inherit from the
+     control, so the options need the surface colors explicitly. */
+  select option {
+    background-color: var(--surface);
+    color: var(--on-surface);
+  }
+
+  /* The forms plugin gives checkboxes a white fill, which on a dark surface
+     reads as already checked. Unchecked is an outline; checked is the accent,
+     which the plugin's white tick sits on legibly in both modes. */
+  [type="checkbox"],
+  [type="radio"] {
+    background-color: transparent;
+    border-color: var(--muted);
+  }
+
+  [type="checkbox"]:checked,
+  [type="radio"]:checked {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  /* Keeps the date picker indicator and other UA widgets legible in dark mode. */
+  input[type="date"],
+  input[type="number"] {
+    color-scheme: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* Shared form control, so the ERB pages (login, password reset) and the React
+   screens stay in step instead of each repeating a utility string. */
+@layer components {
+  .field {
+    display: block;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--field-border);
+    background-color: transparent;
+    color: var(--on-surface);
+    font-size: 1rem;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: 0.5rem;
+    background-color: var(--on-surface);
+    color: var(--surface);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
 }
 
 /* Chart roles. Categorical slots 1 and 2 from the validated palette, stepped

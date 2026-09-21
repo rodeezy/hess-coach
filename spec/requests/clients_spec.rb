@@ -84,3 +84,19 @@ RSpec.describe "Clients", type: :request do
     expect(response).to have_http_status(:not_found)
   end
 end
+
+RSpec.describe "Unauthenticated pages", type: :request do
+  # These are plain ERB rather than Inertia, so they are easy to forget about
+  # when styling changes land (that is how the login field went white on white).
+  it "renders sign in" do
+    get login_path
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("field")
+  end
+
+  it "renders the password reset request page" do
+    get new_password_path
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("field")
+  end
+end
